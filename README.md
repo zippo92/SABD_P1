@@ -15,12 +15,12 @@ Then
 ```
 ./create.sh
 ```
-for create 4 images, of which 1 master and 3 slaves
+use this to create 4 images, of which 1 master and 3 slaves
 
 ```
 ./destroy.sh
 ```
-for destroy them
+and this to destroy them
 
 
 once inside the master image
@@ -28,7 +28,7 @@ once inside the master image
 ```
 ./data/script/startAll.sh
 ```
-for initialize all the environment (hdfs - yarn - spark - nifi)
+to initialize all the environment (hdfs - yarn - spark - nifi)
 
 ## Inject the dataset
 
