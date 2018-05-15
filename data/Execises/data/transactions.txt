@@ -1,0 +1,5 @@
+panda	2
+coffee	4
+acid	1
+starbucks	3
+panda	5

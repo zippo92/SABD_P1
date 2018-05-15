@@ -1,0 +1,4 @@
+panda	"1026 Valencia St"
+coffee	"748 Van Ness Ave"
+acid	"3101 24th St"
+starbucks	"Seattle"
