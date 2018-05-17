@@ -10,7 +10,7 @@ ENV PATH $PATH:$SCALA_HOME/bin
 # # Spark
 RUN wget http://it.apache.contactlab.it/spark/spark-2.3.0/spark-2.3.0-bin-hadoop2.7.tgz ; tar -zxf spark-2.3.0-bin-hadoop2.7.tgz -C /usr/local/ ; rm spark-2.3.0-bin-hadoop2.7.tgz
 RUN cd /usr/local && ln -s ./spark-2.3.0-bin-hadoop2.7 spark
-RUN mkdir /usr/local/spark/sample-data
+#RUN mkdir /usr/local/spark/sample-data
 ENV SPARK_HOME /usr/local/spark
 ENV PATH $PATH:$SPARK_HOME/bin
 RUN mkdir $SPARK_HOME/yarn-remote-client
@@ -18,7 +18,7 @@ RUN mkdir $SPARK_HOME/yarn-remote-client
 RUN apt-get install nano;
 
 #YARN->SPARK CONFIG
-ADD sample-data /usr/local/spark/sample-data
+#ADD sample-data /usr/local/spark/sample-data
 ADD config/yarn-remote-client/core-site.xml $SPARK_HOME/external/spark-native-yarn/conf/
 ADD config/yarn-remote-client/yarn-site.xml $SPARK_HOME/external/spark-native-yarn/conf/
 ADD config/yarn-site.xml $HADOOP_PREFIX/etc/hadoop/yarn-site.xml
