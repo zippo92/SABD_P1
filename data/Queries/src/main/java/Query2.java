@@ -28,7 +28,7 @@ public class Query2 {
                 .filter(plug -> plug.getProperty() == 0)
                 .mapToPair(plug -> new Tuple2<>(new Tuple2<>
                         (plug.getHouse_id(), SmartPlug.timeStampToInteger(plug.getTimestamp())), plug.getValue()))
-                .reduceByKey((x, y) -> x + y);
+
 
 //       JavaPairRDD<Integer, SmartPlug> hourlySmartPlug = rawCsv.map(line -> SmartPlugParser.parseCsv(line)).
 
