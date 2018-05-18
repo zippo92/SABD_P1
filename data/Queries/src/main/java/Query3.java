@@ -21,16 +21,25 @@ public class Query3 {
 
         JavaRDD<String> rawCsv = sc.textFile(file_path);
 
-        JavaPairRDD<String, Double> prova = rawCsv.map(line -> SmartPlugParser.parseCsv(line))
+        JavaPairRDD<String, Double> prova =
+                /* Parse csv line */
+                rawCsv.map(line -> SmartPlugParser.parseCsv(line))
+                /* Filter only energetic consume */
                 .filter(plug -> plug.getProperty() == 0)
+                /* Tuple: ((concatenate_id, timezone), (value, count)) */
                 .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug.getHouse_id() + "_" +
                         plug.getHousehold_id() + "_" + plug.getPlug_id(),
                         SmartPlug.timeStampToFascia(plug.getTimestamp())),
                         new Tuple2<>(plug.getValue(), 1)))
+                /* Sum the values and the counter */
                 .reduceByKey((tuple1, tuple2) -> new Tuple2<>(tuple1._1 + tuple2._1, tuple1._2 + tuple2._2))
+                /* Tuple: (concatenate_id, average) */
                 .mapToPair(plug -> new Tuple2<>(plug._1._1, Query3.convertValue(plug._1._2, plug._2._1, plug._2._2)))
+                /* Compute the different between timezone */
                 .reduceByKey((x, y) -> x+ y)
+                /* Swap trick */
                 .mapToPair(plug -> new Tuple2<>(plug._2, plug._1))
+                /* Sort by value and re-swap */
                 .sortByKey(false).mapToPair(plug -> new Tuple2<>(plug._2, plug._1));
 
         prova.saveAsTextFile("hdfs://master:54310/queryResults/query3");

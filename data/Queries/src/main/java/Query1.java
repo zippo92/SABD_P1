@@ -1,19 +1,10 @@
-import Utils.SmartPlug;
 import Utils.SmartPlugParser;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import scala.Tuple1;
 import scala.Tuple2;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  *
@@ -35,28 +26,21 @@ public class Query1 {
         JavaRDD<String> rawCsv = sc.textFile(file_path);
 
         JavaRDD<Long> houseId =
+                /* Parse csv lines */
                 rawCsv.map(line -> SmartPlugParser.parseCsv(line))
+                /* Filter only power property */
                 .filter(plug -> plug.getProperty()==1)
+                /* Tuple: ((house_id, timestamp), power_value) */
                 .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug.getHouse_id(),plug.getTimestamp()),plug.getValue()))
+                /* Sum values */
                 .reduceByKey((x, y) -> x + y)
+                /* Filter values > 350 */
                 .filter(plug -> plug._2>350)
+                /* Group by house_id */
                 .groupBy(plug -> plug._1._1)
+                /* Take only house_id */
                 .map(plug -> plug._1);
 
-//
-//        JavaRDD<Long> houseId = smartPlugs
-//            .filter(plug -> plug.getProperty()==1 && plug.getValue()>350)
-//            .groupBy(plug -> plug.getHouse_id())
-//            .map(plug -> plug._1);
-
-
         houseId.saveAsTextFile("hdfs://master:54310/queryResults/query1");
-
     }
-
-
-
-
-
-
 }
