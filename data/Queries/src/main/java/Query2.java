@@ -8,6 +8,7 @@ import scala.Tuple2;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Query2 {
 
@@ -24,15 +25,21 @@ public class Query2 {
 
         JavaRDD<String> rawCsv = sc.textFile(file_path);
 
-        JavaPairRDD<Tuple2<Long, Integer>, Float> prova = rawCsv.map(line -> SmartPlugParser.parseCsv(line))
+        JavaPairRDD<Tuple2<Long, Integer>, Tuple2<Double, Double>> prova = rawCsv.map(line -> SmartPlugParser.parseCsv(line))
                 .filter(plug -> plug.getProperty() == 0)
                 .mapToPair(plug -> new Tuple2<>(new Tuple2<>
-                        (plug.getHouse_id(), SmartPlug.timeStampToInteger(plug.getTimestamp())), plug.getValue()))
-
+                        (plug.getHouse_id(), SmartPlug.timeStampToInteger(plug.getTimestamp())),
+                        new Tuple2<>(new Tuple2<>(plug.getValue(),plug.getValue()*plug.getValue()), 1)))
+                .reduceByKey((tuple1,tuple2) -> new Tuple2<>(new Tuple2<>(tuple1._1._1 + tuple2._1._1,
+                                tuple1._1._2 + tuple2._1._2), tuple1._2 + tuple2._2))
+                .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug._1._1, plug._1._2),
+                        new Tuple2<>(plug._2._1._1 / plug._2._2, plug._2._1._2 / plug._2._2)))
+                .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug._1._1, plug._1._2),
+                        new Tuple2<>(plug._2._1,
+                                Math.sqrt(plug._2._2 - (plug._2._1 * plug._2._1)))));
 
 //       JavaPairRDD<Integer, SmartPlug> hourlySmartPlug = rawCsv.map(line -> SmartPlugParser.parseCsv(line)).
 
         prova.saveAsTextFile("hdfs://master:54310/queryResults/query2");
-
     }
 }

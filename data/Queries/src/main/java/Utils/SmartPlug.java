@@ -15,6 +15,7 @@ package Utils;
 //        lizzata (intero senza segno a 32 bit);
 //        • house id e l’id
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -23,13 +24,13 @@ public class SmartPlug {
 
     long id;
     long timestamp;
-    float value;
+    double value;
     long property;
     long plug_id;
     long household_id;
     long house_id;
 
-    public SmartPlug(long id, long timestamp, float value, long property, long plug_id, long household_id, long house_id) {
+    public SmartPlug(long id, long timestamp, double value, long property, long plug_id, long household_id, long house_id) {
         this.id = id;
         this.timestamp = timestamp;
         this.value = value;
@@ -55,11 +56,11 @@ public class SmartPlug {
         this.timestamp = timestamp;
     }
 
-    public float getValue() {
+    public double getValue() {
         return value;
     }
 
-    public void setValue(float value) {
+    public void setValue(double value) {
         this.value = value;
     }
 
@@ -116,6 +117,25 @@ public class SmartPlug {
         }
 
         return result;
+    }
+
+    public static Integer timeStampToFascia(long timestamp){
+        Date date = new Date(timestamp*1000L);
+        SimpleDateFormat jdf = new SimpleDateFormat("HH");
+        SimpleDateFormat jdf2 = new SimpleDateFormat("EEEE");
+        String java_date = jdf.format(date);
+        int hours = Integer.valueOf(java_date);
+        int result = 0;
+
+        Timestamp ts = new Timestamp(timestamp);
+        String java_day = jdf2.format(ts.getTime());
+
+        if(java_day.equals("Saturday") || java_day.equals("Sunday") || hours >= 18 || hours < 6){
+            return 1;
+        }
+        else {
+            return 0;
+        }
     }
 
     @Override
