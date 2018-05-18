@@ -26,7 +26,6 @@ RUN cd $SPARK_HOME/conf; cp spark-env.sh.template spark-env.sh; echo "export SPA
 RUN cd $SPARK_HOME/conf; cp spark-defaults.conf.template spark-defaults.conf; echo "spark.master            yarn\nspark.serializer        org.apache.spark.serializer.KryoSerializer" >> spark-defaults.conf;
 RUN cd $SPARK_HOME/conf; echo "slave1\nslave2\nslave3" > slaves;
 ENV PATH $PATH:$SPARK_HOME/bin:$HADOOP_PREFIX/bin
-
 #APACHE NIFI
 RUN wget http://it.apache.contactlab.it/nifi/1.6.0/nifi-1.6.0-bin.tar.gz; tar -zxf nifi-1.6.0-bin.tar.gz -C /usr/local/ ; rm nifi-1.6.0-bin.tar.gz
 RUN cd /usr/local && ln -s ./nifi-1.6.0 nifi

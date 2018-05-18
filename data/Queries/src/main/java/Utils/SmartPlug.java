@@ -15,6 +15,9 @@ package Utils;
 //        lizzata (intero senza segno a 32 bit);
 //        • house id e l’id
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class SmartPlug {
 
 
@@ -90,6 +93,29 @@ public class SmartPlug {
 
     public void setHouse_id(int house_id) {
         this.house_id = house_id;
+    }
+
+    public static Integer timeStampToInteger(long timestamp){
+        Date date = new Date(timestamp*1000L);
+        SimpleDateFormat jdf = new SimpleDateFormat("HH");
+        String java_date = jdf.format(date);
+        int hours = Integer.valueOf(java_date);
+        int result = 0;
+
+        if(hours >= 0 && hours <= 5){
+            result = 0;
+        }
+        else if(hours >= 6 && hours <= 11){
+            result = 1;
+        }
+        else if(hours >= 12 && hours <= 17){
+            result = 2;
+        }
+        else if(hours >= 18 && hours <= 23){
+            result = 3;
+        }
+
+        return result;
     }
 
     @Override
