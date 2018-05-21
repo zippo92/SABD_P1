@@ -15,6 +15,10 @@ package Utils;
 //        lizzata (intero senza segno a 32 bit);
 //        • house id e l’id
 
+import scala.Tuple2;
+import scala.Tuple3;
+import scala.Tuple4;
+
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -96,27 +100,32 @@ public class SmartPlug {
         this.house_id = house_id;
     }
 
-    public static Integer timeStampToInteger(long timestamp){
+    public static Tuple4<Long,Long,Integer,Integer> getTimeZoneAndDay(long house_id,long plug_id, long timestamp){
         Date date = new Date(timestamp*1000L);
         SimpleDateFormat jdf = new SimpleDateFormat("HH");
         String java_date = jdf.format(date);
         int hours = Integer.valueOf(java_date);
-        int result = 0;
+        int timeZone = 0;
 
         if(hours >= 0 && hours <= 5){
-            result = 0;
+            timeZone = 0;
         }
         else if(hours >= 6 && hours <= 11){
-            result = 1;
+            timeZone = 1;
         }
         else if(hours >= 12 && hours <= 17){
-            result = 2;
+            timeZone = 2;
         }
         else if(hours >= 18 && hours <= 23){
-            result = 3;
+            timeZone = 3;
         }
 
-        return result;
+        jdf = new SimpleDateFormat("dd");
+        int day = Integer.valueOf(jdf.format(date));
+
+
+
+        return new Tuple4<>(house_id,plug_id,day,timeZone);
     }
 
     public static Integer timeStampToFascia(long timestamp){

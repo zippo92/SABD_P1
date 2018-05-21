@@ -5,13 +5,14 @@ library("LiblineaR")
 unisci_id <- function(data)
 {
   
-  id= paste(c(data[3], data[2], data[1]), collapse = "_")
+  #id= paste(c(data[3], data[2], data[1]), collapse = "_")
+  id= data[3];
   
   return(id)
 }
 
 
-dataset <- read.csv("~/Documenti/UNI/SABD/progetto1/SABD_P1/data/d14_filtered.csv", header=FALSE, dec = ",") 
+dataset <- read.csv("~/Documenti/UNI/SABD/progetto1/SABD_P1/data/d14_filtered.csv", header=FALSE) 
 #names(dataset) <- c("id","timestamp","value","property","plug_id","houseOld_id","house_id")
 dataset[,8] <- apply(dataset[,5:7],1,unisci_id);
 dataset <- dataset[dataset$V4 == 0,];
@@ -21,4 +22,4 @@ names(dataset) <- c("id","timestamp","value","house_houseold_plug")
 
 
 out <- split( dataset , f = dataset$house_houseold_plug)
-View(out$`0_0_1`)
+View(out$`0_0_2`)
