@@ -3,14 +3,12 @@ FROM matnar/hadoop
 # # Scala
 RUN wget https://downloads.lightbend.com/scala/2.12.6/scala-2.12.6.tgz ; tar -zxf scala-2.12.6.tgz -C /usr/local/ ; rm scala-2.12.6.tgz
 RUN cd /usr/local && ln -s ./scala-2.12.6 scala
-
 ENV SCALA_HOME /usr/local/scala
 ENV PATH $PATH:$SCALA_HOME/bin
 
 # # Spark
 RUN wget http://it.apache.contactlab.it/spark/spark-2.3.0/spark-2.3.0-bin-hadoop2.7.tgz ; tar -zxf spark-2.3.0-bin-hadoop2.7.tgz -C /usr/local/ ; rm spark-2.3.0-bin-hadoop2.7.tgz
 RUN cd /usr/local && ln -s ./spark-2.3.0-bin-hadoop2.7 spark
-#RUN mkdir /usr/local/spark/sample-data
 ENV SPARK_HOME /usr/local/spark
 ENV PATH $PATH:$SPARK_HOME/bin
 RUN mkdir $SPARK_HOME/yarn-remote-client
@@ -26,6 +24,7 @@ RUN cd $SPARK_HOME/conf; cp spark-env.sh.template spark-env.sh; echo "export SPA
 RUN cd $SPARK_HOME/conf; cp spark-defaults.conf.template spark-defaults.conf; echo "spark.master            yarn\nspark.serializer        org.apache.spark.serializer.KryoSerializer" >> spark-defaults.conf;
 RUN cd $SPARK_HOME/conf; echo "slave1\nslave2\nslave3" > slaves;
 ENV PATH $PATH:$SPARK_HOME/bin:$HADOOP_PREFIX/bin
+
 #APACHE NIFI
 RUN wget http://it.apache.contactlab.it/nifi/1.6.0/nifi-1.6.0-bin.tar.gz; tar -zxf nifi-1.6.0-bin.tar.gz -C /usr/local/ ; rm nifi-1.6.0-bin.tar.gz
 RUN cd /usr/local && ln -s ./nifi-1.6.0 nifi
@@ -34,9 +33,20 @@ RUN cd $NIFI_HOME/conf; mv nifi.properties nifi.properties-old;
 ADD config/nifi.properties $NIFI_HOME/conf
 ADD config/flow.xml.gz $NIFI_HOME/conf
 
+# # HBASE
+RUN wget http://it.apache.contactlab.it/hbase/2.0.0/hbase-2.0.0-bin.tar.gz; tar -zxf hbase-2.0.0-bin.tar.gz -C /usr/local/ ; rm hbase-2.0.0-bin.tar.gz
+RUN cd /usr/local && ln -s ./hbase-2.0.0 hbase
+ENV HBASE_HOME /usr/local/hbase
+RUN cd $HBASE_HOME/conf; mv hbase-site.xml hbase-site.xml-old;
+ADD config/hbase-site.xml $HBASE_HOME/conf
+RUN cd $HBASE_HOME/conf; echo "export JAVA_HOME=$JAVA_HOME" >> hbase-env.sh;
+
 
 #Yarn ports
 EXPOSE 8030 8031 8032 8033 8040 8042 8088
+#Hbase ports
+EXPOSE 16010
+
 # #Other ports
 EXPOSE 49707 2122 53411 7077 56302 54310
 

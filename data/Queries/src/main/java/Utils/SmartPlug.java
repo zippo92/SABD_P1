@@ -128,27 +128,37 @@ public class SmartPlug {
         return new Tuple4<>(house_id,plug_id,day,timeZone);
     }
 
-    public static Integer timeStampToFascia(long timestamp){
+    public static Tuple3<String,Integer,Integer> getTimeSlotAndDay(long house_id,long household_id,long plug_id,long timestamp){
         Date date = new Date(timestamp*1000L);
-        SimpleDateFormat jdf = new SimpleDateFormat("HH");
-        SimpleDateFormat jdf2 = new SimpleDateFormat("EEEE");
-        String java_date = jdf.format(date);
-        int hours = Integer.valueOf(java_date);
-        int result = 0;
+        SimpleDateFormat jdf_hh = new SimpleDateFormat("HH");
+        SimpleDateFormat jdf_eeee = new SimpleDateFormat("EEEE");
+        SimpleDateFormat jdf_dd = new SimpleDateFormat("dd");
 
-        Timestamp ts = new Timestamp(timestamp);
-        String java_day = jdf2.format(ts.getTime());
+        int hours = Integer.valueOf(jdf_hh.format(date));
+        String dayName = jdf_eeee.format(date);
+        int dd = Integer.valueOf(jdf_dd.format(date));
 
-        if(java_day.equals("Saturday") || java_day.equals("Sunday") || hours >= 18 || hours < 6){
-            return 1;
-        }
-        else {
-            return 0;
-        }
+
+        String id = house_id + "_" + household_id + "_" + plug_id;
+
+        if(dayName.equals("Saturday") || dayName.equals("Sunday"))
+            return new Tuple3<>(id,dd,3);
+        else if(hours>=0 && hours<6)
+            return new Tuple3<>(id,dd,1);
+        else if(hours>=6 && hours<18)
+            return new Tuple3<>(id, dd, 0);
+        else if (hours>=18 && hours <= 23)
+            return new Tuple3<>(id, dd, 2);
+        else
+            return null;
     }
+
 
     @Override
     public String toString() {
+
+
+
         return "SmartPlug{" +
                 "id=" + id +
                 ", timestamp=" + timestamp +
