@@ -22,7 +22,11 @@
             <version>1.5</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>org.apache.parquet</groupId>
+            <artifactId>parquet-avro</artifactId>
+            <version>1.9.0</version> <!-- or latest version -->
+        </dependency>
     </dependencies>
 
     <build>

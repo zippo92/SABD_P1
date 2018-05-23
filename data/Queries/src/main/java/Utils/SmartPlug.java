@@ -22,6 +22,7 @@ import scala.Tuple4;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class SmartPlug {
 
@@ -103,6 +104,7 @@ public class SmartPlug {
     public static Tuple4<Long,Long,Integer,Integer> getTimeZoneAndDay(long house_id,long plug_id, long timestamp){
         Date date = new Date(timestamp*1000L);
         SimpleDateFormat jdf = new SimpleDateFormat("HH");
+        jdf.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
         String java_date = jdf.format(date);
         int hours = Integer.valueOf(java_date);
         int timeZone = 0;
@@ -128,11 +130,16 @@ public class SmartPlug {
         return new Tuple4<>(house_id,plug_id,day,timeZone);
     }
 
+
     public static Tuple3<String,Integer,Integer> getTimeSlotAndDay(long house_id,long household_id,long plug_id,long timestamp){
         Date date = new Date(timestamp*1000L);
         SimpleDateFormat jdf_hh = new SimpleDateFormat("HH");
+        jdf_hh.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
         SimpleDateFormat jdf_eeee = new SimpleDateFormat("EEEE");
+        jdf_eeee.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
         SimpleDateFormat jdf_dd = new SimpleDateFormat("dd");
+        jdf_dd.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
+
 
         int hours = Integer.valueOf(jdf_hh.format(date));
         String dayName = jdf_eeee.format(date);
@@ -157,11 +164,14 @@ public class SmartPlug {
     @Override
     public String toString() {
 
+        Date date = new Date(timestamp*1000L);
+        SimpleDateFormat jdf = new SimpleDateFormat("dd/MM/yyyy'T'HH:mm:ss");
+        jdf.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
 
 
         return "SmartPlug{" +
                 "id=" + id +
-                ", timestamp=" + timestamp +
+                ", timestamp=" + jdf.format(date) +
                 ", value=" + value +
                 ", property=" + property +
                 ", plug_id=" + plug_id +
