@@ -1,3 +1,4 @@
+import Utils.HDFSUtils;
 import Utils.SmartPlugParser;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
@@ -17,19 +18,10 @@ public class Query1 {
     public static void main(String[] args) throws IOException {
 
 
-        SparkConf conf = new SparkConf()
-                .setMaster("local")
-                .setAppName("Query1");
-        JavaSparkContext sc = new JavaSparkContext(conf);
-
-
-        JavaRDD<String> rawCsv = sc.textFile(file_path);
 
         JavaRDD<Long> houseId =
                 /* Parse csv lines */
-                rawCsv.map(line -> SmartPlugParser.parseCsv(line))
-                /* Filter only power property */
-                .filter(plug -> plug.getProperty()==1)
+                HDFSUtils.startSessionFromCsv()
                 /* Tuple: ((house_id, timestamp), power_value) */
                 .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug.getHouse_id(),plug.getTimestamp()),plug.getValue()))
                 /* Sum values */

@@ -1,3 +1,4 @@
+import Utils.HDFSUtils;
 import Utils.SmartPlug;
 import Utils.SmartPlugParser;
 import jdk.incubator.http.internal.frame.DataFrame;
@@ -21,27 +22,13 @@ public class AvroRead {
 
     public static void main(String[] args) {
 
-        SparkSession spark = SparkSession.builder().master("local").getOrCreate();
 
-// Creates a DataFrame from a specified file
-        Dataset<Row> df = spark.read().format("com.databricks.spark.avro")
-                .load(file_path);
-
-        JavaRDD<Row> rawCsv = df.toJavaRDD();
+        JavaRDD<SmartPlug> query = HDFSUtils.startSessionFromAvro()
+                .filter(plug -> plug.getProperty()==0);
 
 
-        JavaRDD<SmartPlug> prova =
-            /* Parse csv lines */
-                rawCsv.map(line -> SmartPlugParser.parseCsv(line.toString()))
-            /* Filter only energetic consume */
-                        .filter(plug -> plug.getProperty() == 0);
-
-
-        for(SmartPlug smartPlug : prova.take(10))
-        {
-
+        for(SmartPlug smartPlug : query.take(10))
             System.out.println(smartPlug.toString());
-        }
 
 
     }

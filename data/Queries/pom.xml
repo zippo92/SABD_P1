@@ -31,11 +31,10 @@
             <artifactId>parquet-avro</artifactId>
             <version>1.9.0</version> <!-- or latest version -->
         </dependency>
-
         <dependency>
             <groupId>com.databricks</groupId>
-            <artifactId>spark-avro_2.11</artifactId>
-            <version>4.0.0</version>
+            <artifactId>spark-avro_2.10</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
     </dependencies>

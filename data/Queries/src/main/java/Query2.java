@@ -1,3 +1,4 @@
+import Utils.HDFSUtils;
 import Utils.SmartPlug;
 import Utils.SmartPlugParser;
 import com.sun.rowset.internal.Row;
@@ -25,16 +26,10 @@ public class Query2 {
 
     public static void main(String[] args) {
 
-        SparkConf conf = new SparkConf()
-                .setMaster("local")
-                .setAppName("Query2");
-        JavaSparkContext sc = new JavaSparkContext(conf);
-//
-        JavaRDD<String> rawCsv = sc.textFile(file_path);
 
         JavaPairRDD<Tuple2<Long,Integer>,Tuple2<Double,Double>> prova =
             /* Parse csv lines */
-            rawCsv.map(line -> SmartPlugParser.parseCsv(line))
+            HDFSUtils.startSessionFromCsv()
             /* Filter only energetic consume */
             .filter(plug -> plug.getProperty() == 0)
             /*Map to tuple : [(House_id,Plug_id,DD,TZ)(Val,Val)]*/

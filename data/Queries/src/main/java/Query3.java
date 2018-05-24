@@ -1,3 +1,4 @@
+import Utils.HDFSUtils;
 import Utils.SmartPlug;
 import Utils.SmartPlugParser;
 import org.apache.spark.SparkConf;
@@ -23,19 +24,9 @@ public class Query3 {
 
 
     public static void main(String[] args) {
-
-        SparkConf conf = new SparkConf()
-                .setMaster("local")
-                .setAppName("Query3");
-        JavaSparkContext sc = new JavaSparkContext(conf);
-
-
-
-        JavaRDD<String> rawCsv = sc.textFile(file_path);
-
         JavaPairRDD<String, Double> prova =
             /* Parse csv line */
-            rawCsv.map(line -> SmartPlugParser.parseCsv(line))
+            HDFSUtils.startSessionFromCsv()
             /* Filter only energetic consume */
             .filter(plug -> plug.getProperty() == 0)
             /* map to tuple: ((concatenate_id,DD,TZ), (value, value)) */
