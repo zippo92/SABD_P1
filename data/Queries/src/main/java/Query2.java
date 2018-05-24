@@ -1,14 +1,16 @@
 import Utils.SmartPlug;
 import Utils.SmartPlugParser;
+import com.sun.rowset.internal.Row;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
 import scala.Int;
 import scala.Tuple2;
 import scala.Tuple3;
-import scala.Tuple4;
 
+import scala.Tuple4;
 
 /**
  * Per ogni casa, calcolare il consumo energetico medio e la sua deviazione standard nelle quattro fasce
@@ -53,5 +55,8 @@ public class Query2 {
             .mapToPair(plug -> new Tuple2<>(plug._1, new Tuple2<>(plug._2._1, Math.sqrt(plug._2._2 - (plug._2._1)*(plug._2._1)))));
 
         prova.saveAsTextFile("hdfs://master:54310/queryResults/query2");
+
+
+
     }
 }

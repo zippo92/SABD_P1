@@ -6,7 +6,6 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 
-
 /**
  * Si considerino le seguenti fasce di consumo dell’energia elettrica, differenziate in base all’ora e al
  giorno della settimana, ed a cui corrispondono differenti tariffe: fascia di punta, che si applica negli
@@ -31,6 +30,7 @@ public class Query3 {
         JavaSparkContext sc = new JavaSparkContext(conf);
 
 
+
         JavaRDD<String> rawCsv = sc.textFile(file_path);
 
         JavaPairRDD<String, Double> prova =
@@ -41,7 +41,7 @@ public class Query3 {
             /* map to tuple: ((concatenate_id,DD,TZ), (value, value)) */
             .mapToPair(plug -> new Tuple2<>(SmartPlug.getTimeSlotAndDay(plug.getHouse_id(),plug.getHousehold_id(),plug.getPlug_id(),plug.getTimestamp()),
                     new Tuple2<>(plug.getValue(),plug.getValue())))
-            /* Calculate min and max of that slot: ((concatenate_id,DD,TZ), (value, value))*/
+            /* Calculate min and max of that slot: ((concatenate_id,DD,TZ), (max, min))*/
             .reduceByKey((tuple1,tuple2) -> new Tuple2<>(Math.max(tuple1._1,tuple2._1),Math.min(tuple1._2,tuple2._2)))
             /* map to tuple: ((concatenate_id,TZ), (delta, counter)) */
             .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug._1._1(),plug._1._3()),new Tuple2<>(plug._2._1-plug._2._2,1)))

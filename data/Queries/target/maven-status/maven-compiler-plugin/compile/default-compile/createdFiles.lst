@@ -2,4 +2,5 @@ Query1.class
 Utils/SmartPlug.class
 Utils/SmartPlugParser.class
 Query3.class
+AvroRead.class
 Query2.class
