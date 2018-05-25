@@ -13,6 +13,19 @@ public class HDFSUtils {
 
 
 
+    public static JavaRDD<SmartPlug> startSession(String conf)
+    {
+
+        if(conf.equals("csv"))
+            return HDFSUtils.startSessionFromCsv();
+        if(conf.equals("avro"))
+            return HDFSUtils.startSessionFromAvro();
+
+        else
+            return null;
+    }
+
+
     public static JavaRDD<SmartPlug> startSessionFromAvro()
     {
 

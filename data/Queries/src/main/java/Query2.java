@@ -21,16 +21,12 @@ import scala.Tuple4;
  */
 public class Query2 {
 
-    private static final String file_path = "hdfs://master:54310/FilesFromNifi/d14_filtered.csv";
-
 
     public static void main(String[] args) {
 
-
         JavaPairRDD<Tuple2<Long,Integer>,Tuple2<Double,Double>> prova =
             /* Parse csv lines */
-            HDFSUtils.startSessionFromCsv()
-            /* Filter only energetic consume */
+            HDFSUtils.startSession(args[0])            /* Filter only energetic consume */
             .filter(plug -> plug.getProperty() == 0)
             /*Map to tuple : [(House_id,Plug_id,DD,TZ)(Val,Val)]*/
             .mapToPair(plug -> new Tuple2<>(SmartPlug.getTimeZoneAndDay(plug.getHouse_id(),plug.getPlug_id(),plug.getTimestamp()),new Tuple2<>(plug.getValue(),plug.getValue())))

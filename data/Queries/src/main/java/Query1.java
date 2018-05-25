@@ -13,15 +13,13 @@ import java.io.IOException;
  */
 public class Query1 {
 
-    private static final String file_path = "hdfs://master:54310/FilesFromNifi/d14_filtered.csv";
-
     public static void main(String[] args) throws IOException {
 
 
 
         JavaRDD<Long> houseId =
                 /* Parse csv lines */
-                HDFSUtils.startSessionFromCsv()
+                HDFSUtils.startSession(args[0])
                 /* Tuple: ((house_id, timestamp), power_value) */
                 .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug.getHouse_id(),plug.getTimestamp()),plug.getValue()))
                 /* Sum values */

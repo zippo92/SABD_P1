@@ -19,8 +19,19 @@ timestamp <- function(data)
     aa <- as.POSIXct(y, origin="1970-01-01")
     boh <- unclass(as.POSIXlt(aa))
     
-    return(boh$hour)
+    hours <- boh$hour
     
+    if(boh$wday == 0 || boh$wday==6)
+      return(3)
+    else
+    {
+    if(hours>=0 && hours<6)
+      return(1)
+    if(hours>=6 && hours<18)
+      return(0)
+    if (hours>=18 && hours <= 23)
+      return(2)
+    }
   })
   
   
@@ -35,6 +46,10 @@ hour <- function(data)
     
     aa <- as.POSIXct(y, origin="1970-01-01")
     boh <- unclass(as.POSIXlt(aa))
+    
+  
+  
+    
     
     return(boh$mday)
     
@@ -65,6 +80,15 @@ dividiore <- function(data)
   
 }
 
+meannn <- function(x) 
+{
+  
+  
+  max <- max(x$value)
+  min <- min(x$value)
+  
+  return (max-min)
+}
 
 dataset <- read.csv("~/Documenti/UNI/SABD/progetto1/SABD_P1/data/d14_filtered.csv", header=FALSE) 
 #names(dataset) <- c("id","timestamp","value","property","plug_id","houseOld_id","house_id")
@@ -74,64 +98,46 @@ dataset <- dataset[,-c(4,5,6,7)];
 names(dataset) <- c("id","timestamp","value","house_houseold_plug")
 
 dataset$timestamp <- timestamp(dataset$timestamp)
+
+
 dataset_day <- dataset
 
 
-dataset_day$wday <- hour(dataset$timestamp)
-dataset_day$house_houseold_plug <- dataset$house_houseold_plug
+#dataset_day$wday <- hour(dataset$timestamp)
+#dataset_day$house_houseold_plug <- dataset$house_houseold_plug
 
-names(dataset_day) <- c("id","hour","value","house_houseold_plug","wday")
+#names(dataset_day) <- c("id","hour","value","house_houseold_plug","wday")
+
+
+#dataset_day$mday <- hour(dataset$timestamp)
+#write.table(dataset_day,"dataset_day.txt")
 
 
 
 
 dataset_day <- read.csv("~/dataset_day.txt", sep="")
-dataset_day$hour <- dividiore(dataset_day$hour)
-
-
-
-write.table(dataset_day,"dataset_day.txt")
-
-
-
-
 out <- split( dataset_day , f= dataset$house_houseold_plug)
+out0 <- split( out$`0_0_2` , f = out$`0_0_2`$timestamp)
+out00 <-split( out0$`3` , f = out0$`3`$mday)
 
-out0 <- split( out$`6_0_1` , f = out$`6_0_1`$hour)
-out00 <-split( out0$`1` , f = out0$`1`$wday)
-
-View(out00$`9`)
-
-
-meannn <- function(x) 
-{
-  
-  
-  max <- max(x$value)
-  min <- min(x$value)
-
-  return (max-min)
-}
 
 
 sums <- lapply(out00,meannn)
 
-boh <- 0;
+sommatotale <- 0;
 for(i in 1:length(sums))
 {
-  boh <- boh + sums[[i]]
+  sommatotale <- sommatotale + sums[[i]]
   
 }  
 
-mean602 <- boh / length(sums)
-
-mean600 + mean601 + mean602
+lamedia <- sommatotale / length(sums)
 
 
-View(out00$`0`)
-aa<-1378760900
-aa <- as.POSIXct(aa, origin="1970-01-01")
 
+#View(out00$`0`)
+#aa<-1377986760
+#aa <- as.POSIXct(aa, origin="1970-01-01")
 
 #boh <- unclass(as.POSIXlt(aa))
-#boh$wday
+

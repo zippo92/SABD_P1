@@ -6,6 +6,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
+import scala.Tuple3;
 
 /**
  * Si considerino le seguenti fasce di consumo dell’energia elettrica, differenziate in base all’ora e al
@@ -20,32 +21,30 @@ import scala.Tuple2;
  */
 public class Query3 {
 
-    private static final String file_path = "hdfs://master:54310/FilesFromNifi/d14_filtered.csv";
-
 
     public static void main(String[] args) {
-        JavaPairRDD<String, Double> prova =
+        JavaPairRDD<String,Double> prova =
             /* Parse csv line */
-            HDFSUtils.startSessionFromCsv()
-            /* Filter only energetic consume */
-            .filter(plug -> plug.getProperty() == 0)
-            /* map to tuple: ((concatenate_id,DD,TZ), (value, value)) */
-            .mapToPair(plug -> new Tuple2<>(SmartPlug.getTimeSlotAndDay(plug.getHouse_id(),plug.getHousehold_id(),plug.getPlug_id(),plug.getTimestamp()),
-                    new Tuple2<>(plug.getValue(),plug.getValue())))
-            /* Calculate min and max of that slot: ((concatenate_id,DD,TZ), (max, min))*/
-            .reduceByKey((tuple1,tuple2) -> new Tuple2<>(Math.max(tuple1._1,tuple2._1),Math.min(tuple1._2,tuple2._2)))
-            /* map to tuple: ((concatenate_id,TZ), (delta, counter)) */
-            .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug._1._1(),plug._1._3()),new Tuple2<>(plug._2._1-plug._2._2,1)))
-            /* Sum the values and the counter */
-            .reduceByKey((tuple1, tuple2) -> new Tuple2<>(tuple1._1 + tuple2._1, tuple1._2 + tuple2._2))
-            /* map to tuple: (concatenate_id, +- average (+ if slot 0, - else) */
-            .mapToPair(plug -> new Tuple2<>(plug._1._1, Query3.convertValue(plug._1._2, plug._2._1, plug._2._2)))
-            /* Compute the different between timezone */
-            .reduceByKey((x, y) -> x+ y)
-            /* Swap trick */
-            .mapToPair(plug -> new Tuple2<>(plug._2, plug._1))
-            /* Sort by value and re-swap */
-            .sortByKey(false).mapToPair(plug -> new Tuple2<>(plug._2, plug._1));
+        HDFSUtils.startSession(args[0])
+                /* Filter only energetic consume */
+        .filter(plug -> plug.getProperty()==0)
+        /* map to tuple: ((concatenate_id,DD,TZ), (value, value)) */
+        .mapToPair(plug -> new Tuple2<>(SmartPlug.getTimeSlotAndDay(plug.getHouse_id(),plug.getHousehold_id(),plug.getPlug_id(),plug.getTimestamp()),
+            new Tuple2<>(plug.getValue(),plug.getValue())))
+        /* Calculate min and max of that slot: ((concatenate_id,DD,TZ), (max, min))*/
+        .reduceByKey((tuple1,tuple2) -> new Tuple2<>(Math.max(tuple1._1,tuple2._1),Math.min(tuple1._2,tuple2._2)))
+        /* map to tuple: ((concatenate_id,TZ), (delta, counter)) */
+        .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug._1._1(),plug._1._3()),new Tuple2<>(plug._2._1-plug._2._2,1)))
+        //            /* Sum the values and the counter */
+        .reduceByKey((tuple1, tuple2) -> new Tuple2<>(tuple1._1 + tuple2._1, tuple1._2 + tuple2._2))
+        //            /* map to tuple: (concatenate_id, +- average (+ if slot 0, - else) */
+        .mapToPair(plug -> new Tuple2<>(plug._1._1, Query3.convertValue(plug._1._2, plug._2._1, plug._2._2)))
+        //            /* Compute the different between timezone */
+        .reduceByKey((x, y) -> x+ y)
+        //            /* Swap trick */
+        .mapToPair(plug -> new Tuple2<>(plug._2, plug._1))
+        //            /* Sort by value and re-swap */
+        .sortByKey(false).mapToPair(plug -> new Tuple2<>(plug._2, plug._1));
 
         prova.saveAsTextFile("hdfs://master:54310/queryResults/query3");
     }

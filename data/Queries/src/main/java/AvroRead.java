@@ -24,10 +24,10 @@ public class AvroRead {
 
 
         JavaRDD<SmartPlug> query = HDFSUtils.startSessionFromAvro()
-                .filter(plug -> plug.getProperty()==0);
+                .filter(plug -> plug.getProperty()==0 && plug.getId()==3740246309L);
 
 
-        for(SmartPlug smartPlug : query.take(10))
+        for(SmartPlug smartPlug : query.take(1))
             System.out.println(smartPlug.toString());
 
 
