@@ -62,8 +62,6 @@ public class HDFSUtils {
                 rawCsv.map(line -> SmartPlugParser.parseCsv(line));
 
         return dataset;
-
-
     }
 
 }

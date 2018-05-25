@@ -1,11 +1,22 @@
 import Utils.HDFSUtils;
+import Utils.Query1Wrapper;
 import Utils.SmartPlugParser;
+import com.google.gson.Gson;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -31,6 +42,30 @@ public class Query1 {
                 /* Take only house_id */
                 .map(plug -> plug._1);
 
-        houseId.saveAsTextFile("hdfs://master:54310/queryResults/query1");
+        //houseId.saveAsTextFile("hdfs://master:54310/queryResults/query1");
+
+        List<Query1Wrapper> wrappers = new ArrayList<>();
+        long id = 1;
+
+        for(Long house : houseId.collect()){
+            Query1Wrapper wrapper = new Query1Wrapper();
+            wrapper.setRow_id(id);
+            wrapper.setHouse_id(house);
+            id++;
+            wrappers.add(wrapper);
+        }
+
+        Gson gson = new Gson();
+        String query1 = gson.toJson(wrappers);
+
+        Configuration configuration = new Configuration();
+        URI toUri = URI.create("hdfs://master:54310/queryResults/query1/query1.json");
+        FileSystem fs = FileSystem.get(toUri,configuration);
+
+        FSDataOutputStream out = fs.create(new Path(toUri));
+
+        out.writeBytes(query1);
+        out.close();
+
     }
 }

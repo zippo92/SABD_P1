@@ -50,5 +50,4 @@ EXPOSE 16010
 # #Other ports
 EXPOSE 49707 2122 53411 7077 56302 54310
 
-
 #GUIDA INSTALLAZIONE HBASE https://medium.com/@yzhong.cs/hbase-installation-step-by-step-guide-cb73381a7a4c
