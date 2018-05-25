@@ -1,12 +1,15 @@
-import Utils.HDFSUtils;
-import Utils.SmartPlug;
-import Utils.SmartPlugParser;
+import Utils.*;
+import com.google.gson.Gson;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 import scala.Tuple3;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Si considerino le seguenti fasce di consumo dell’energia elettrica, differenziate in base all’ora e al
@@ -22,7 +25,7 @@ import scala.Tuple3;
 public class Query3 {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         JavaPairRDD<String,Double> prova =
             /* Parse csv line */
         HDFSUtils.startSession(args[0])
@@ -46,7 +49,25 @@ public class Query3 {
         //            /* Sort by value and re-swap */
         .sortByKey(false).mapToPair(plug -> new Tuple2<>(plug._2, plug._1));
 
-        prova.saveAsTextFile("hdfs://master:54310/queryResults/query3");
+        prova.saveAsTextFile("hdfs://master:54310/queryResultsTmp/query3");
+
+        List<Query3Wrapper> wrappers = new ArrayList<>();
+        long id = 1;
+
+        for(Tuple2<String, Double> tuple : prova.collect()){
+            Query3Wrapper wrapper = new Query3Wrapper();
+            wrapper.setRow_id(id);
+            wrapper.setKey(tuple._1);
+            wrapper.setValue(tuple._2);
+            id++;
+            wrappers.add(wrapper);
+        }
+
+        WriteJson writeJson = new WriteJson();
+        Gson gson = new Gson();
+        String query3 = gson.toJson(wrappers);
+        writeJson.write(query3, "hdfs://master:54310/queryResults/query3/query3.json");
+
     }
 
    public static Double convertValue(Integer hour, Double value, Integer count){

@@ -5,6 +5,7 @@ AvroRead.class
 Utils/Query2Wrapper.class
 Utils/Query1Wrapper.class
 Utils/WriteJson.class
+Utils/Query3Wrapper.class
 Utils/SmartPlug.class
 Query3.class
 Utils/SmartPlugParser.class
