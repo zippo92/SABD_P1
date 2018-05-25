@@ -1,6 +1,7 @@
 import Utils.HDFSUtils;
 import Utils.Query1Wrapper;
 import Utils.SmartPlugParser;
+import Utils.WriteJson;
 import com.google.gson.Gson;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -42,7 +43,7 @@ public class Query1 {
                 /* Take only house_id */
                 .map(plug -> plug._1);
 
-        //houseId.saveAsTextFile("hdfs://master:54310/queryResults/query1");
+        houseId.saveAsTextFile("hdfs://master:54310/queryResultsTmp/query1");
 
         List<Query1Wrapper> wrappers = new ArrayList<>();
         long id = 1;
@@ -55,17 +56,10 @@ public class Query1 {
             wrappers.add(wrapper);
         }
 
+        WriteJson writeJson = new WriteJson();
         Gson gson = new Gson();
         String query1 = gson.toJson(wrappers);
-
-        Configuration configuration = new Configuration();
-        URI toUri = URI.create("hdfs://master:54310/queryResults/query1/query1.json");
-        FileSystem fs = FileSystem.get(toUri,configuration);
-
-        FSDataOutputStream out = fs.create(new Path(toUri));
-
-        out.writeBytes(query1);
-        out.close();
+        writeJson.write(query1, "hdfs://master:54310/queryResults/query1/query1.json");
 
     }
 }

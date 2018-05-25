@@ -1,6 +1,5 @@
-import Utils.HDFSUtils;
-import Utils.SmartPlug;
-import Utils.SmartPlugParser;
+import Utils.*;
+import com.google.gson.Gson;
 import com.sun.rowset.internal.Row;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -13,6 +12,10 @@ import scala.Tuple3;
 
 import scala.Tuple4;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Per ogni casa, calcolare il consumo energetico medio e la sua deviazione standard nelle quattro fasce
  orarie: notte, dalle ore 00:00 alle ore 05:59; mattino, dalle 06:00 alle 11:59; pomeriggio, dalle 12:00
@@ -22,7 +25,7 @@ import scala.Tuple4;
 public class Query2 {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         JavaPairRDD<Tuple2<Long,Integer>,Tuple2<Double,Double>> prova =
             /* Parse csv lines */
@@ -45,9 +48,25 @@ public class Query2 {
 //////            /* Map to tuple: ((house_id, timezone), (mean, standard deviation)) */
             .mapToPair(plug -> new Tuple2<>(plug._1, new Tuple2<>(plug._2._1, Math.sqrt(plug._2._2 - (plug._2._1)*(plug._2._1)))));
 
-        prova.saveAsTextFile("hdfs://master:54310/queryResults/query2");
+        prova.saveAsTextFile("hdfs://master:54310/queryResultsTmp/query2");
 
+        List<Query2Wrapper> wrappers = new ArrayList<>();
+        long id = 1;
 
+        for(Tuple2<Tuple2<Long, Integer>, Tuple2<Double, Double>> tupla : prova.collect()){
+            Query2Wrapper wrapper = new Query2Wrapper();
+            wrapper.setRow_id(id);
+            wrapper.setKey(String.valueOf(tupla._1._1) + "_" + String.valueOf(tupla._1._2));
+            wrapper.setMean(tupla._2._1);
+            wrapper.setStd(tupla._2._2);
+            id++;
+            wrappers.add(wrapper);
+        }
+
+        WriteJson writeJson = new WriteJson();
+        Gson gson = new Gson();
+        String query2 = gson.toJson(wrappers);
+        writeJson.write(query2, "hdfs://master:54310/queryResults/query2/query2.json");
 
     }
 }

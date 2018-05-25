@@ -2,7 +2,9 @@ Query1.class
 Utils/HbaseConnector.class
 Utils/HDFSUtils.class
 AvroRead.class
+Utils/Query2Wrapper.class
 Utils/Query1Wrapper.class
+Utils/WriteJson.class
 Utils/SmartPlug.class
 Query3.class
 Utils/SmartPlugParser.class

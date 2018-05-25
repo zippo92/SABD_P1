@@ -1,0 +1,3 @@
+create 'query1', 'house_id'
+create 'query2', 'key', 'mean', 'std'
+create 'query3', 'key', 'value'
