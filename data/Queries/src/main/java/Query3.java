@@ -26,35 +26,35 @@ public class Query3 {
 
 
     public static void main(String[] args) throws IOException {
-        JavaPairRDD<String,Double> prova =
+        JavaPairRDD<String,Double> query3 =
             /* Parse csv line */
-        HDFSUtils.startSession(args[0])
-                /* Filter only energetic consume */
-        .filter(plug -> plug.getProperty()==0)
-        /* map to tuple: ((concatenate_id,DD,TZ), (value, value)) */
-        .mapToPair(plug -> new Tuple2<>(SmartPlug.getTimeSlotAndDay(plug.getHouse_id(),plug.getHousehold_id(),plug.getPlug_id(),plug.getTimestamp()),
-            new Tuple2<>(plug.getValue(),plug.getValue())))
-        /* Calculate min and max of that slot: ((concatenate_id,DD,TZ), (max, min))*/
-        .reduceByKey((tuple1,tuple2) -> new Tuple2<>(Math.max(tuple1._1,tuple2._1),Math.min(tuple1._2,tuple2._2)))
-        /* map to tuple: ((concatenate_id,TZ), (delta, counter)) */
-        .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug._1._1(),plug._1._3()),new Tuple2<>(plug._2._1-plug._2._2,1)))
-        //            /* Sum the values and the counter */
-        .reduceByKey((tuple1, tuple2) -> new Tuple2<>(tuple1._1 + tuple2._1, tuple1._2 + tuple2._2))
-        //            /* map to tuple: (concatenate_id, +- average (+ if slot 0, - else) */
-        .mapToPair(plug -> new Tuple2<>(plug._1._1, Query3.convertValue(plug._1._2, plug._2._1, plug._2._2)))
-        //            /* Compute the different between timezone */
-        .reduceByKey((x, y) -> x+ y)
-        //            /* Swap trick */
-        .mapToPair(plug -> new Tuple2<>(plug._2, plug._1))
-        //            /* Sort by value and re-swap */
-        .sortByKey(false).mapToPair(plug -> new Tuple2<>(plug._2, plug._1));
+            HDFSUtils.startSession(args[0],args[1])
+            /* Filter only energetic consume */
+            .filter(plug -> plug.getProperty()==0)
+            /* map to tuple: ((concatenate_id,DD,TZ), (value, value)) */
+            .mapToPair(tuple -> new Tuple2<>(SmartPlug.getTimeSlotAndDay(tuple.getHouse_id(),tuple.getHousehold_id(),tuple.getPlug_id(),tuple.getTimestamp()),
+                new Tuple2<>(tuple.getValue(),tuple.getValue())))
+            /* Calculate min and max of that slot: ((concatenate_id,DD,TZ), (max, min))*/
+            .reduceByKey((tuple1,tuple2) -> new Tuple2<>(Math.max(tuple1._1,tuple2._1),Math.min(tuple1._2,tuple2._2)))
+            /* map to tuple: ((concatenate_id,TZ), (delta, counter)) */
+            .mapToPair(tuple -> new Tuple2<>(new Tuple2<>(tuple._1._1(),tuple._1._3()),new Tuple2<>(tuple._2._1-tuple._2._2,1)))
+            /* Sum the values and the counter */
+            .reduceByKey((tuple1, tuple2) -> new Tuple2<>(tuple1._1 + tuple2._1, tuple1._2 + tuple2._2))
+            /* map to tuple: (concatenate_id, +- average (+ if slot 0, - else) */
+            .mapToPair(tuple -> new Tuple2<>(tuple._1._1, Query3.convertValue(tuple._1._2, tuple._2._1, tuple._2._2)))
+            /* Compute the sum (or difference) between timezone */
+            .reduceByKey((x, y) -> x+ y)
+            /* Swap trick */
+            .mapToPair(tuple -> new Tuple2<>(tuple._2, tuple._1))
+            /* Sort by value and re-swap */
+            .sortByKey(false).mapToPair(tuple -> new Tuple2<>(tuple._2, tuple._1));
 
-        prova.saveAsTextFile("hdfs://master:54310/queryResultsTmp/query3");
+        query3.saveAsTextFile("hdfs://master:54310/queryResultsTmp/query3");
 
         List<Query3Wrapper> wrappers = new ArrayList<>();
         long id = 1;
 
-        for(Tuple2<String, Double> tuple : prova.collect()){
+        for(Tuple2<String, Double> tuple : query3.collect()){
             Query3Wrapper wrapper = new Query3Wrapper();
             wrapper.setRow_id(id);
             wrapper.setKey(tuple._1);
@@ -65,8 +65,8 @@ public class Query3 {
 
         WriteJson writeJson = new WriteJson();
         Gson gson = new Gson();
-        String query3 = gson.toJson(wrappers);
-        writeJson.write(query3, "hdfs://master:54310/queryResults/query3/query3.json");
+        String gsonQuery3 = gson.toJson(wrappers);
+        writeJson.write(gsonQuery3, "hdfs://master:54310/queryResults/query3/query3.json");
 
     }
 

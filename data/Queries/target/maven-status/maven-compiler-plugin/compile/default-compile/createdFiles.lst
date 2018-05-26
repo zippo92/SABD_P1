@@ -1,12 +1,12 @@
-Query1.class
 Utils/HbaseConnector.class
+Query1.class
 Utils/HDFSUtils.class
-AvroRead.class
 Utils/Query2Wrapper.class
 Utils/Query1Wrapper.class
 Utils/WriteJson.class
-Utils/Query3Wrapper.class
 Utils/SmartPlug.class
-Query3.class
+Utils/Query3Wrapper.class
 Utils/SmartPlugParser.class
+Query3.class
 Query2.class
+Utils/FilterWrongLines.class

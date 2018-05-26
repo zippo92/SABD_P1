@@ -30,21 +30,24 @@ public class Query1 {
 
 
         JavaRDD<Long> houseId =
-                /* Parse csv lines */
-                HDFSUtils.startSession(args[0])
-                /* Tuple: ((house_id, timestamp), power_value) */
-                .mapToPair(plug -> new Tuple2<>(new Tuple2<>(plug.getHouse_id(),plug.getTimestamp()),plug.getValue()))
-                /* Sum values */
-                .reduceByKey((x, y) -> x + y)
-                /* Filter values > 350 */
-                .filter(plug -> plug._2>350)
-                /* Group by house_id */
-                .groupBy(plug -> plug._1._1)
-                /* Take only house_id */
-                .map(plug -> plug._1);
+            /* Parse csv or avro lines and filter by 1 property */
+            HDFSUtils.startSession(args[0],args[1])
+             .filter(plug -> plug.getProperty()==1)
+            /* Map to tuple: ((house_id, timestamp), power_value) */
+            .mapToPair(tuple -> new Tuple2<>(new Tuple2<>(tuple.getHouse_id(),tuple.getTimestamp()),tuple.getValue()))
+            /* Sum values */
+            .reduceByKey((x, y) -> x + y)
+            /* Filter values > 350 */
+            .filter(plug -> plug._2>350)
+            /* Group by house_id */
+            .groupBy(plug -> plug._1._1)
+            /* Take only house_id */
+            .map(plug -> plug._1);
 
+        /*Save the result on hdfs*/
         houseId.saveAsTextFile("hdfs://master:54310/queryResultsTmp/query1");
 
+        /*JSONize the result and save on hdfs (because NIFI will take it, convert to avro and save to Hbase) */
         List<Query1Wrapper> wrappers = new ArrayList<>();
         long id = 1;
 

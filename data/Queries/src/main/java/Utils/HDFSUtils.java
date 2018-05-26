@@ -13,23 +13,30 @@ public class HDFSUtils {
 
 
 
-    public static JavaRDD<SmartPlug> startSession(String conf)
+    public static JavaRDD<SmartPlug> startSession(String format, String local)
     {
 
-        if(conf.equals("csv"))
-            return HDFSUtils.startSessionFromCsv();
-        if(conf.equals("avro"))
-            return HDFSUtils.startSessionFromAvro();
+        if(format.equals("csv"))
+            return HDFSUtils.startSessionFromCsv(local);
+        if(format.equals("avro"))
+            return HDFSUtils.startSessionFromAvro(local);
 
         else
             return null;
     }
 
 
-    public static JavaRDD<SmartPlug> startSessionFromAvro()
+    public static JavaRDD<SmartPlug> startSessionFromAvro(String local)
     {
 
-        SparkSession spark = SparkSession.builder().master("local").getOrCreate();
+        SparkSession spark;
+
+        if(local.equals("local"))
+            spark = SparkSession.builder().master("local").getOrCreate();
+        if(local.equals("yarn"))
+            spark = SparkSession.builder().getOrCreate();
+        else
+            return null;
 
 // Creates a DataFrame from a specified file
         Dataset<Row> df = spark.read().format("com.databricks.spark.avro")
@@ -46,12 +53,16 @@ public class HDFSUtils {
     }
 
 
-    public static JavaRDD<SmartPlug> startSessionFromCsv()
+    public static JavaRDD<SmartPlug> startSessionFromCsv(String local)
     {
 
-        SparkConf conf = new SparkConf()
-                .setMaster("local")
-                .setAppName("Query1");
+
+        SparkConf conf = new SparkConf().setAppName("Query");
+
+        if(local.equals("local"))
+            conf.setMaster("local");
+
+
         JavaSparkContext sc = new JavaSparkContext(conf);
 
 
