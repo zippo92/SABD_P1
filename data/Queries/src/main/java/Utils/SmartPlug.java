@@ -103,10 +103,13 @@ public class SmartPlug {
 
     public static Tuple4<Long,Long,Integer,Integer> getTimeZoneAndDay(long house_id,long plug_id, long timestamp){
         Date date = new Date(timestamp*1000L);
-        SimpleDateFormat jdf = new SimpleDateFormat("HH");
-        jdf.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
-        String java_date = jdf.format(date);
-        int hours = Integer.valueOf(java_date);
+        SimpleDateFormat jdf_hh = new SimpleDateFormat("HH");
+        SimpleDateFormat jdf_dd = new SimpleDateFormat("dd");
+        jdf_hh.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
+        jdf_dd.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
+
+
+        int hours = Integer.valueOf(jdf_hh.format(date));
         int timeZone = 0;
 
         if(hours >= 0 && hours <= 5){
@@ -122,8 +125,8 @@ public class SmartPlug {
             timeZone = 3;
         }
 
-        jdf = new SimpleDateFormat("dd");
-        int day = Integer.valueOf(jdf.format(date));
+
+        int day = Integer.valueOf(jdf_dd.format(date));
 
 
 

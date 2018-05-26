@@ -59,23 +59,27 @@ hour <- function(data)
 
 dividiore <- function(data)
 {
-  output <- sapply(data,function(hours){
+  output <- sapply(data,function(y){
+    
+    
+    aa <- as.POSIXct(y, origin="1970-01-01")
+    boh <- unclass(as.POSIXlt(aa))
+    
+    hours <- boh$hour
+    
     timeZone <- 0; 
     if(hours >= 0 && hours <= 5){
-      timeZone <- 0;
+      return(0);
     }
     else if(hours >= 6 && hours <= 11){
-      timeZone <- 1;
+      return(1);
     }
     else if(hours >= 12 && hours <= 17){
-      timeZone <- 2;
+      return(2);
     }
     else if(hours >= 18 && hours <= 23){
-      timeZone <- 3;
+      return(3);
     }
-    
-    return(timeZone)
-    
   })
   
 }
@@ -96,11 +100,17 @@ dataset[,8] <- apply(dataset[,5:7],1,unisci_id);
 dataset <- dataset[dataset$V4 == 0,];
 dataset <- dataset[,-c(4,5,6,7)];
 names(dataset) <- c("id","timestamp","value","house_houseold_plug")
-
-dataset$timestamp <- timestamp(dataset$timestamp)
-
-
 dataset_day <- dataset
+
+dataset_day$tz <- dividiore(dataset$timestamp)
+dataset_day$mday <- hour(dataset$timestamp)
+write.table(dataset_day,"dataset_day.txt")
+
+
+
+#dataset$timestamp <- timestamp(dataset$timestamp)
+
+
 
 
 #dataset_day$wday <- hour(dataset$timestamp)
@@ -109,19 +119,16 @@ dataset_day <- dataset
 #names(dataset_day) <- c("id","hour","value","house_houseold_plug","wday")
 
 
-#dataset_day$mday <- hour(dataset$timestamp)
-#write.table(dataset_day,"dataset_day.txt")
 
 
 
 
 dataset_day <- read.csv("~/dataset_day.txt", sep="")
 out <- split( dataset_day , f= dataset$house_houseold_plug)
-out0 <- split( out$`0_0_2` , f = out$`0_0_2`$timestamp)
-out00 <-split( out0$`3` , f = out0$`3`$mday)
+out0 <- split( out$`8_0_0` , f = out$`8_0_0`$tz)
+out00 <-split( out0$`0` , f = out0$`0`$mday)
 
-
-
+View(out00$`15`)
 sums <- lapply(out00,meannn)
 
 sommatotale <- 0;
