@@ -6,10 +6,12 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 import scala.Tuple3;
+import scala.Tuple4;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Si considerino le seguenti fasce di consumo dell’energia elettrica, differenziate in base all’ora e al
@@ -26,6 +28,10 @@ public class Query3 {
 
 
     public static void main(String[] args) throws IOException {
+
+        List<Tuple3<String,Integer,Integer>> wrongRows = Query3.convertWrongRows(HDFSUtils.getListOfWrongRows(args[1]).collect());
+
+
         JavaPairRDD<String,Double> query3 =
             /* Parse csv line */
             HDFSUtils.startSession(args[0],args[1])
@@ -34,6 +40,8 @@ public class Query3 {
             /* map to tuple: ((concatenate_id,DD,TZ), (value, value)) */
             .mapToPair(tuple -> new Tuple2<>(SmartPlug.getTimeSlotAndDay(tuple.getHouse_id(),tuple.getHousehold_id(),tuple.getPlug_id(),tuple.getTimestamp()),
                 new Tuple2<>(tuple.getValue(),tuple.getValue())))
+             /*Filter wrong misurations*/
+            .filter(tuple -> Query3.excludeWrongRow(tuple._1,wrongRows))
             /* Calculate min and max of that slot: ((concatenate_id,DD,TZ), (max, min))*/
             .reduceByKey((tuple1,tuple2) -> new Tuple2<>(Math.max(tuple1._1,tuple2._1),Math.min(tuple1._2,tuple2._2)))
             /* map to tuple: ((concatenate_id,TZ), (delta, counter)) */
@@ -63,14 +71,43 @@ public class Query3 {
             wrappers.add(wrapper);
         }
 
-        WriteJson writeJson = new WriteJson();
         Gson gson = new Gson();
         String gsonQuery3 = gson.toJson(wrappers);
-        writeJson.write(gsonQuery3, "hdfs://master:54310/queryResults/query3/query3.json");
+        HDFSUtils.writeOnHdfs(gsonQuery3, "hdfs://master:54310/queryResults/query3/query3.json");
 
     }
 
-   public static Double convertValue(Integer hour, Double value, Integer count){
+    private static List<Tuple3<String,Integer,Integer>> convertWrongRows(List<Tuple4<Long, Long, Integer, Integer>> wrongRows) {
+
+        List<Tuple3<String,Integer,Integer>> list = new ArrayList<>();
+
+
+        for(Tuple4<Long, Long, Integer, Integer> row : wrongRows)
+        {
+            /*
+            * 0->1
+            * 1->0
+            * 2->0
+            * 3->2
+            * */
+
+            String id = row._1() + "_0_" + row._2();
+            if(row._4() == 0)
+                 list.add(new Tuple3<>(id,row._3(),1));
+            else if(row._4() == 1)
+                list.add(new Tuple3<>(id,row._3(),0));
+            else if(row._4() == 2)
+                list.add(new Tuple3<>(id,row._3(),0));
+            else if(row._4() == 3)
+                list.add(new Tuple3<>(id,row._3(),2));
+
+        }
+
+        return list;
+
+    }
+
+    public static Double convertValue(Integer hour, Double value, Integer count){
 
         Double avg = value/count;
 
@@ -81,4 +118,14 @@ public class Query3 {
             return -(avg);
         }
    }
+
+    private static Boolean excludeWrongRow(Tuple3<String, Integer, Integer> tuple, List<Tuple3<String, Integer, Integer>> wrongRows) {
+
+
+        for(Tuple3<String, Integer, Integer> wrongRow : wrongRows)
+            if(Objects.equals(wrongRow._1(), tuple._1()) && Objects.equals(wrongRow._2(), tuple._2()) && Objects.equals(wrongRow._3(), tuple._3()))
+                return false;
+
+        return true;
+    }
 }

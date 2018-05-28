@@ -59,10 +59,9 @@ public class Query1 {
             wrappers.add(wrapper);
         }
 
-        WriteJson writeJson = new WriteJson();
         Gson gson = new Gson();
         String query1 = gson.toJson(wrappers);
-        writeJson.write(query1, "hdfs://master:54310/queryResults/query1/query1.json");
+        HDFSUtils.writeOnHdfs(query1, "hdfs://master:54310/queryResults/query1/query1.json");
 
     }
 }

@@ -15,6 +15,7 @@ import scala.Tuple4;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Per ogni casa, calcolare il consumo energetico medio e la sua deviazione standard nelle quattro fasce
@@ -27,6 +28,9 @@ public class Query2 {
 
     public static void main(String[] args) throws IOException {
 
+
+        List<Tuple4<Long, Long, Integer, Integer>> wrongRows = HDFSUtils.getListOfWrongRows(args[1]).collect();
+
         JavaPairRDD<Tuple2<Long, Integer>, Tuple2<Double, Double>> query2 =
             /* Parse csv or avro lines */
             HDFSUtils.startSession(args[0],args[1])
@@ -34,6 +38,8 @@ public class Query2 {
             .filter(tuple -> tuple.getProperty() == 0)
             /*Map to tuple : [(House_id,Plug_id,DD,TZ)(Val,Val)]*/
             .mapToPair(tuple -> new Tuple2<>(SmartPlug.getTimeZoneAndDay(tuple.getHouse_id(),tuple.getPlug_id(),tuple.getTimestamp()),new Tuple2<>(tuple.getValue(),tuple.getValue())))
+            /*Filter wrong misurations*/
+            .filter(tuple -> Query2.excludeWrongRow(tuple._1,wrongRows))
             /*Calculate max and min of each tuple4 -> (House_id,Plug_id,DD,TZ)(Max,Min) */
             .reduceByKey((tuple1,tuple2) -> new Tuple2<>(Math.max(tuple1._1,tuple2._1),Math.min(tuple1._2,tuple2._2)))
             /*Map to Tuple: (house_id,Plug_id,TZ)(delta,delta^2,counter )*/
@@ -67,10 +73,20 @@ public class Query2 {
             wrappers.add(wrapper);
         }
 
-        WriteJson writeJson = new WriteJson();
         Gson gson = new Gson();
         String gsonQuery2 = gson.toJson(wrappers);
-        writeJson.write(gsonQuery2, "hdfs://master:54310/queryResults/query2/query2.json");
+        HDFSUtils.writeOnHdfs(gsonQuery2, "hdfs://master:54310/queryResults/query2/query2.json");
 
     }
+
+    private static Boolean excludeWrongRow(Tuple4<Long, Long, Integer, Integer> tuple, List<Tuple4<Long, Long, Integer, Integer>> wrongRows) {
+
+        for(Tuple4<Long, Long, Integer, Integer> wrongRow : wrongRows)
+            if(Objects.equals(wrongRow._1(), tuple._1()) && Objects.equals(wrongRow._2(), tuple._2()) && Objects.equals(wrongRow._3(), tuple._3()) && Objects.equals(wrongRow._4(), tuple._4()))
+                return false;
+
+        return true;
+    }
+
+
 }
