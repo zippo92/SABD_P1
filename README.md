@@ -28,7 +28,7 @@ once inside the master image
 ```
 ./data/script/startAll.sh
 ```
-to initialize all the environment (hdfs - yarn - spark - nifi)
+to initialize all the environment (hdfs - yarn - spark - nifi - hbase)
 
 ## Inject the dataset
 
@@ -39,6 +39,33 @@ localhost:5555/nifi
 ```
 
 select all the processors (CTRL+A) and press the play button ▻
+(there are 2 templates, one for data injection, and one is for saving the results on HBASe)
+
+
+## Run the queries
+
+## Exposed ports
+you can explore all components by accessing the exposed ports on localhost:
+
+
+```
+http://localhost:8088/cluster - hadoop world
+```
+```
+http://localhost:5555/nifi - nifi
+```
+```
+http://localhost:50070 - hdfs
+```
+```
+http://localhost:16010 - hbase
+```
+
+
+
+
+and this to destroy them
+
 
 
 ## Built With
@@ -47,3 +74,4 @@ select all the processors (CTRL+A) and press the play button ▻
 * [Apache Hadoop YARN](https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html) - Resources manager
 * [Apache SPARK](https://spark.apache.org/) - Unified Analytics Engine for Big Data
 * [Apache NIFI](https://nifi.apache.org/) - Data Injection Framework
+* [Apache HBASE](https://hbase.apache.org/) - Column-Family database
