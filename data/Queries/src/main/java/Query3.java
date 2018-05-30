@@ -7,6 +7,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 import scala.Tuple3;
 import scala.Tuple4;
+import scala.Tuple5;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,12 +78,12 @@ public class Query3 {
 
     }
 
-    private static List<Tuple3<String,Integer,Integer>> convertWrongRows(List<Tuple4<Long, Long, Integer, Integer>> wrongRows) {
+    private static List<Tuple3<String,Integer,Integer>> convertWrongRows(List<Tuple5<Long,Long, Long, Integer, Integer>> wrongRows) {
 
         List<Tuple3<String,Integer,Integer>> list = new ArrayList<>();
 
 
-        for(Tuple4<Long, Long, Integer, Integer> row : wrongRows)
+        for(Tuple5<Long, Long,Long, Integer, Integer> row : wrongRows)
         {
             /*
             * 0->1
@@ -91,15 +92,15 @@ public class Query3 {
             * 3->2
             * */
 
-            String id = row._1() + "_0_" + row._2();
-            if(row._4() == 0)
-                 list.add(new Tuple3<>(id,row._3(),1));
-            else if(row._4() == 1)
-                list.add(new Tuple3<>(id,row._3(),0));
-            else if(row._4() == 2)
-                list.add(new Tuple3<>(id,row._3(),0));
-            else if(row._4() == 3)
-                list.add(new Tuple3<>(id,row._3(),2));
+            String id = row._1() + "_"+row._2()+"_" + row._3();
+            if(row._5() == 0)
+                 list.add(new Tuple3<>(id,row._4(),1));
+            else if(row._5() == 1)
+                list.add(new Tuple3<>(id,row._4(),0));
+            else if(row._5() == 2)
+                list.add(new Tuple3<>(id,row._4(),0));
+            else if(row._5() == 3)
+                list.add(new Tuple3<>(id,row._4(),2));
 
         }
 

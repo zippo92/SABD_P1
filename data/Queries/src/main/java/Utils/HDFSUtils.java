@@ -11,6 +11,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import scala.Tuple4;
+import scala.Tuple5;
 
 import java.io.IOException;
 import java.net.URI;
@@ -78,7 +79,7 @@ public class HDFSUtils {
     }
 
 
-    public static JavaRDD<Tuple4<Long, Long, Integer, Integer>> getListOfWrongRows (String local)
+    public static JavaRDD<Tuple5<Long,Long, Long, Integer, Integer>> getListOfWrongRows (String local)
     {
 
         String wrongLinesPath = "hdfs://master:54310/FilesFromNifi/wrongRows.csv";
@@ -87,7 +88,7 @@ public class HDFSUtils {
 
         JavaRDD<String> rawCsv = sc.textFile(wrongLinesPath);
 
-        JavaRDD<Tuple4<Long, Long, Integer, Integer>> wrongRows =
+        JavaRDD<Tuple5<Long,Long, Long, Integer, Integer>> wrongRows =
                 /* Parse csv lines */
                 rawCsv.map(line -> SmartPlugParser.parseWrongLines(line));
 

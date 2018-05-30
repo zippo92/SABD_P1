@@ -18,6 +18,7 @@ package Utils;
 import scala.Tuple2;
 import scala.Tuple3;
 import scala.Tuple4;
+import scala.Tuple5;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -101,7 +102,7 @@ public class SmartPlug {
         this.house_id = house_id;
     }
 
-    public static Tuple4<Long,Long,Integer,Integer> getTimeZoneAndDay(long house_id,long plug_id, long timestamp){
+    public static Tuple5<Long,Long,Long,Integer,Integer> getTimeZoneAndDay(long house_id,long household_id, long plug_id, long timestamp){
         Date date = new Date(timestamp*1000L);
         SimpleDateFormat jdf_hh = new SimpleDateFormat("HH");
         SimpleDateFormat jdf_dd = new SimpleDateFormat("dd");
@@ -130,7 +131,7 @@ public class SmartPlug {
 
 
 
-        return new Tuple4<>(house_id,plug_id,day,timeZone);
+        return new Tuple5<>(house_id,household_id,plug_id,day,timeZone);
     }
 
 

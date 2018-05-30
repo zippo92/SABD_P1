@@ -2,6 +2,7 @@ package Utils;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import scala.Tuple4;
+import scala.Tuple5;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -23,11 +24,11 @@ public class SmartPlugParser {
         return smartPlug;
     }
 
-   public static Tuple4<Long, Long, Integer, Integer> parseWrongLines(String line)
+   public static Tuple5<Long,Long, Long, Integer, Integer> parseWrongLines(String line)
    {
        String[] split = line.split(",");
 
-       return new Tuple4<>(Long.parseLong(split[0]),Long.parseLong(split[1]),Integer.parseInt(split[2]),Integer.parseInt(split[3]));
+       return new Tuple5<>(Long.parseLong(split[0]),Long.parseLong(split[1]),Long.parseLong(split[2]),Integer.parseInt(split[3]),Integer.parseInt(split[4]));
 
    }
 

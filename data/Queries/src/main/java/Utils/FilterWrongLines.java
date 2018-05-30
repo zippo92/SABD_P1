@@ -4,15 +4,14 @@ import Utils.HDFSUtils;
 import Utils.SmartPlug;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import scala.Array;
-import scala.Tuple2;
-import scala.Tuple3;
-import scala.Tuple4;
+import scala.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.Double;
+import java.lang.Long;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -24,19 +23,19 @@ public class FilterWrongLines {
 
         JavaRDD<SmartPlug> smartPlugJavaRDD = HDFSUtils.startSession(args[0],"local");
 
-        JavaPairRDD<Tuple4<Long, Long, Integer, Integer>, Iterable<Tuple3<Double, Long, Long>>> allLines =
+        JavaPairRDD<Tuple5<Long,Long, Long, Integer, Integer>, Iterable<Tuple3<Double, Long, Long>>> allLines =
             smartPlugJavaRDD
             .filter(plug -> plug.getProperty() == 0)
-            .mapToPair(plug -> new Tuple2<>(SmartPlug.getTimeZoneAndDay(plug.getHouse_id(), plug.getPlug_id(), plug.getTimestamp()), new Tuple3<>(plug.getValue(), plug.getTimestamp(), plug.getId())))
+            .mapToPair(plug -> new Tuple2<>(SmartPlug.getTimeZoneAndDay(plug.getHouse_id(),plug.getHousehold_id(), plug.getPlug_id(), plug.getTimestamp()), new Tuple3<>(plug.getValue(), plug.getTimestamp(), plug.getId())))
              .mapToPair(plug -> new Tuple2<>(plug._2._2(), new Tuple3<>(plug._1, plug._2._1(), plug._2._3())))
             .sortByKey(true)
             .mapToPair(plug -> new Tuple2<>(plug._2._1(), new Tuple3<>(plug._2._2(), plug._1, plug._2._3())))
             .groupByKey();
 
 
-        ArrayList<Tuple4<Long,Long,Integer,Integer>> wrongDays = new ArrayList<>();
+        ArrayList<Tuple5<Long,Long,Long,Integer,Integer>> wrongDays = new ArrayList<>();
 
-        for (Tuple2<Tuple4<Long, Long, Integer, Integer>, Iterable<Tuple3<Double, Long, Long>>> tupla : allLines.collect()) {
+        for (Tuple2<Tuple5<Long,Long, Long, Integer, Integer>, Iterable<Tuple3<Double, Long, Long>>> tupla : allLines.collect()) {
             Iterator iterator = tupla._2.iterator();
             Double precval = 0.0;
 
@@ -57,7 +56,7 @@ public class FilterWrongLines {
         if(wrongDays.size()!=0) {
             String days = "";
 
-            for (Tuple4<Long, Long, Integer, Integer> day : wrongDays)
+            for (Tuple5<Long,Long,Long, Integer, Integer> day : wrongDays)
             {
                days = days + day.toString().substring(1,day.toString().length()-1) + "\n";
 

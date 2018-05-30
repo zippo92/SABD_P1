@@ -38,11 +38,11 @@ public class Query1 {
             /* Sum values */
             .reduceByKey((x, y) -> x + y)
             /* Filter values > 350 */
-            .filter(plug -> plug._2>350)
+            .filter(tuple -> tuple._2>350)
             /* Group by house_id */
-            .groupBy(plug -> plug._1._1)
+            .groupBy(tuple -> tuple._1._1)
             /* Take only house_id */
-            .map(plug -> plug._1);
+            .map(tuple -> tuple._1);
 
         /*Save the result on hdfs*/
         houseId.saveAsTextFile("hdfs://master:54310/queryResultsTmp/query1");
