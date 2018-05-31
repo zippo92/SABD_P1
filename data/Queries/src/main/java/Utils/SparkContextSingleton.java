@@ -28,7 +28,7 @@ public class SparkContextSingleton {
             SparkConf conf = new SparkConf().setAppName("Query");
 
             if (local.equals("local"))
-                conf.setMaster("local");
+                conf.setMaster("local[*]");
 
             sc = new JavaSparkContext(conf);
 

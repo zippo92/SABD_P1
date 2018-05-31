@@ -42,7 +42,7 @@ public class HDFSUtils {
         SparkSession spark;
 
         if(local.equals("local"))
-            spark = SparkSession.builder().master("local").getOrCreate();
+            spark = SparkSession.builder().master("local[*]").getOrCreate();
         else if(local.equals("yarn"))
             spark = SparkSession.builder().getOrCreate();
         else
